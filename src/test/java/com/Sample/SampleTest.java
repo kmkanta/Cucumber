@@ -15,6 +15,7 @@ import org.openqa.selenium.OutputType;
 import org.openqa.selenium.Point;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterMethod;
@@ -33,26 +34,30 @@ public class SampleTest {
 
 	}
 
-	public void takePartialScreenShot(WebElement element) throws IOException {
+	public void takePartialScreenShot(WebElement element, String fileName) throws IOException {
 		String destFile = null;
-		
+
 		Calendar calendar = Calendar.getInstance();
 		SimpleDateFormat formater = new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss");
-		
-		String reportDirectory = new File(System.getProperty("user.dir")).getAbsolutePath()
-				+ "\\src\\main\\java\\com\\ScreenShots\\";
-		destFile = reportDirectory + "sample_" + formater.format(calendar.getTime()) + ".png";
-		File screen = ((TakesScreenshot) this.driver).getScreenshotAs(OutputType.FILE);
-		
-		Point p = element.getLocation();
-		int width = element.getSize().getWidth();
-		int height = element.getSize().getHeight();
-		
-		BufferedImage img = ImageIO.read(screen);
-		BufferedImage dest = img.getSubimage(p.getX(), p.getY(), width, height);
-		
-		ImageIO.write(dest, "png", screen);
-		FileUtils.copyFile(screen, new File(destFile));
+
+		try {
+			String reportDirectory = new File(System.getProperty("user.dir")).getAbsolutePath()
+					+ "\\src\\main\\java\\com\\ScreenShots\\";
+			destFile = reportDirectory + fileName + "_" + formater.format(calendar.getTime()) + ".png";
+			File screen = ((TakesScreenshot) this.driver).getScreenshotAs(OutputType.FILE);
+
+			Point p = element.getLocation();
+			int width = element.getSize().getWidth();
+			int height = element.getSize().getHeight();
+
+			BufferedImage img = ImageIO.read(screen);
+			BufferedImage dest = img.getSubimage(p.getX(), p.getY(), width, height);
+
+			ImageIO.write(dest, "png", screen);
+			FileUtils.copyFile(screen, new File(destFile));
+		} catch (WebDriverException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Test
@@ -60,9 +65,11 @@ public class SampleTest {
 		WebElement uname = driver.findElement(By.id("email"));
 		WebElement password = driver.findElement(By.id("pass"));
 		WebElement loginButton = driver.findElement(By.xpath("(//*[@type ='submit'])[1]"));
+		takePartialScreenShot(uname, "UserName_Field");
 		uname.sendKeys("mani");
+		takePartialScreenShot(password, "Password_Field");
 		password.sendKeys("password");
-		takePartialScreenShot(loginButton);
+		takePartialScreenShot(loginButton, "LoginButton_Field");
 		loginButton.click();
 	}
 
