@@ -3,6 +3,8 @@ package com.Sample;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.concurrent.TimeUnit;
 
 import javax.imageio.ImageIO;
@@ -24,7 +26,7 @@ public class SampleTest {
 
 	@BeforeMethod
 	public void launchBrowser() {
-		System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir")+"\\Drivers\\chromedriver.exe");
+		System.setProperty("webdriver.chrome.driver", System.getProperty("user.dir") + "\\Drivers\\chromedriver.exe");
 		driver = new ChromeDriver();
 		driver.get("https://www.facebook.com/");
 		driver.manage().timeouts().implicitlyWait(20, TimeUnit.SECONDS);
@@ -32,15 +34,25 @@ public class SampleTest {
 	}
 
 	public void takePartialScreenShot(WebElement element) throws IOException {
-		String screenShot = System.getProperty("user.dir") + "\\screenShot.png";
+		String destFile = null;
+		
+		Calendar calendar = Calendar.getInstance();
+		SimpleDateFormat formater = new SimpleDateFormat("dd_MM_yyyy_hh_mm_ss");
+		
+		String reportDirectory = new File(System.getProperty("user.dir")).getAbsolutePath()
+				+ "\\src\\main\\java\\com\\ScreenShots\\";
+		destFile = reportDirectory + "sample_" + formater.format(calendar.getTime()) + ".png";
 		File screen = ((TakesScreenshot) this.driver).getScreenshotAs(OutputType.FILE);
+		
 		Point p = element.getLocation();
 		int width = element.getSize().getWidth();
 		int height = element.getSize().getHeight();
+		
 		BufferedImage img = ImageIO.read(screen);
 		BufferedImage dest = img.getSubimage(p.getX(), p.getY(), width, height);
+		
 		ImageIO.write(dest, "png", screen);
-		FileUtils.copyFile(screen, new File(screenShot));
+		FileUtils.copyFile(screen, new File(destFile));
 	}
 
 	@Test
